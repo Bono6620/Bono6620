@@ -7,12 +7,15 @@ Figma, and many other teams.
 
 That index links out to hundreds of separate repositories, each maintained independently by its own team, so
 cloning and applying all of them verbatim isn't practical (or, for anything under a non-permissive license,
-appropriate) inside a single personal repo. Instead, this directory contains a **curated selection of ~12
-skills**, written from scratch to cover the categories that are broadly useful across everyday engineering work:
-version control, testing, infrastructure, databases, frontend frameworks, payments, monitoring, SEO, design
-handoff, and building new agent tools.
+appropriate) inside a single personal repo. Instead, this directory contains a **curated selection**, written
+from scratch to cover the categories that are broadly useful across everyday engineering work: version control,
+testing, infrastructure, databases, frontend frameworks, payments, monitoring, SEO, design handoff, building new
+agent tools, and — a second, security-focused batch — authorized penetration testing, bug bounty hunting, and
+Python.
 
 ## What's here
+
+### General engineering
 
 | Skill | Covers |
 |---|---|
@@ -28,6 +31,25 @@ handoff, and building new agent tools.
 | `figma-to-code` | Translating Figma designs into production code |
 | `mcp-server-builder` | Designing and shipping new MCP tools |
 | `web-artifact-builder` | Self-contained HTML/React artifacts and dashboards |
+
+### Security, pentesting & Python
+
+All of these assume — and the first one enforces — that testing is authorized (a signed engagement, a
+bug-bounty program's published scope, or a CTF/lab environment). None of this is for use against systems
+without confirmed permission.
+
+| Skill | Covers |
+|---|---|
+| `authorized-security-testing-scope` | Authorization/scope gate — read first, every time |
+| `bug-bounty-methodology` | Target selection, recon, and report submission on bounty programs |
+| `web-app-pentest-checklist` | OWASP-style web vulnerability coverage |
+| `api-security-testing` | REST/GraphQL auth, BOLA, mass assignment, rate limiting |
+| `network-pentest-recon` | Host/service discovery and enumeration |
+| `static-analysis-vuln-scanning` | Semgrep/CodeQL usage, triage, custom rules |
+| `python-security-scripting` | Writing Python tooling for authorized testing |
+| `python-best-practices` | General Python: typing, `uv`/`ruff`, testing, idioms |
+| `ctf-challenge-solving` | Web, pwn, crypto, forensics, and rev categories |
+| `vulnerability-report-writing` | Report structure, tone, and responsible disclosure |
 
 ## How Claude Code uses these
 

@@ -68,6 +68,22 @@ without confirmed permission.
 | `ai-image-video-generation` | Prompting, model selection, and usage-rights checks |
 | `notion-workspace-automation` | Database design, API access, content structuring |
 
+### Analytics, marketing & misc platforms
+
+| Skill | Covers |
+|---|---|
+| `sanity-cms-content-modeling` | Schema design, GROQ queries, portable text |
+| `clickhouse-analytics` | Table/sorting-key design, query patterns, ingestion |
+| `firebase-backend-integration` | Firestore modeling, security rules, Cloud Functions |
+| `flutter-mobile-development` | Widget structure, state management, platform quirks |
+| `gsap-web-animation` | Timelines, ScrollTrigger, performance, reduced-motion |
+| `marketing-copywriting` | Landing pages, ads, email structure, persuasion mechanics |
+| `paid-ads-campaign-strategy` | Targeting, creative testing, funnel diagnosis |
+| `web3-crypto-integration` | Wallet connections, on-chain reads, transaction UX/security |
+| `linear-project-management` | Issue structuring, cycles, projects, API automation |
+| `duckdb-local-analytics` | Fast local SQL over CSV/Parquet, pandas interop |
+| `web-accessibility-a11y` | Semantic HTML, keyboard/focus, ARIA, WCAG contrast |
+
 ## How Claude Code uses these
 
 Each skill is a `SKILL.md` file with YAML frontmatter (`name`, `description`) followed by actionable guidance.

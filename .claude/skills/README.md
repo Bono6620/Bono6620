@@ -10,8 +10,8 @@ cloning and applying all of them verbatim isn't practical (or, for anything unde
 appropriate) inside a single personal repo. Instead, this directory contains a **curated selection**, written
 from scratch to cover the categories that are broadly useful across everyday engineering work: version control,
 testing, infrastructure, databases, frontend frameworks, payments, monitoring, SEO, design handoff, building new
-agent tools, and — a second, security-focused batch — authorized penetration testing, bug bounty hunting, and
-Python.
+agent tools, mobile, CMS, ML/AI workflows, and API/data platforms — plus a security-focused batch on authorized
+penetration testing, bug bounty hunting, and Python.
 
 ## What's here
 
@@ -50,6 +50,23 @@ without confirmed permission.
 | `python-best-practices` | General Python: typing, `uv`/`ruff`, testing, idioms |
 | `ctf-challenge-solving` | Web, pwn, crypto, forensics, and rev categories |
 | `vulnerability-report-writing` | Report structure, tone, and responsible disclosure |
+
+### Mobile, CMS, ML/AI & data platforms
+
+| Skill | Covers |
+|---|---|
+| `expo-react-native` | Navigation, native modules, EAS builds, OTA updates |
+| `wordpress-plugin-development` | Hooks, Gutenberg blocks, REST routes, WP-CLI |
+| `huggingface-ml-workflows` | Hub, datasets, fine-tuning, Spaces/Inference deployment |
+| `graphql-api-design` | Schema design, resolvers, N+1s, Apollo Federation |
+| `web-scraping-and-crawling` | Ethical/legal boundaries plus extraction technique |
+| `programmatic-video-remotion` | Data-driven video generation with React + Remotion |
+| `redis-caching-patterns` | Key design, TTLs, stampede protection, rate limiting |
+| `mongodb-data-modeling` | Document modeling, indexing, aggregation pipelines |
+| `observability-monitoring` | Logs/metrics/traces, dashboards, alerting design |
+| `auth0-identity-integration` | OAuth2/OIDC flows, token handling, multi-tenant auth |
+| `ai-image-video-generation` | Prompting, model selection, and usage-rights checks |
+| `notion-workspace-automation` | Database design, API access, content structuring |
 
 ## How Claude Code uses these
 

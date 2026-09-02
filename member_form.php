@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../includes/functions.php';
-require_admin();
+require_once __DIR__ . '/includes/auth.php';
+require_edit();
 
 $id = (int) ($_GET['id'] ?? 0);
 $member = $id ? get_member($id) : null;
@@ -12,12 +12,12 @@ if ($id && !$member) {
 $others = array_filter(get_all_members(), fn ($m) => (int) $m['id'] !== $id);
 
 $pageTitle = $member ? 'تعديل فرد' : 'إضافة فرد';
-$assetPrefix = '../';
-require __DIR__ . '/../includes/header.php';
+$activeTab = 'tree';
+require __DIR__ . '/includes/header.php';
 ?>
 <h1><?= $member ? 'تعديل بيانات ' . e(member_full_name($member)) : 'إضافة فرد جديد' ?></h1>
 
-<form method="post" action="save_member.php" enctype="multipart/form-data" class="stacked-form">
+<form method="post" action="member_save.php" enctype="multipart/form-data" class="stacked-form">
     <?= csrf_field() ?>
     <input type="hidden" name="id" value="<?= (int) ($member['id'] ?? 0) ?>">
 
@@ -80,12 +80,12 @@ require __DIR__ . '/../includes/header.php';
         <input type="file" name="photo" accept="image/png,image/jpeg,image/webp">
     </label>
     <?php if (!empty($member['photo'])): ?>
-        <img class="current-photo" src="../<?= e(UPLOAD_URL . '/' . $member['photo']) ?>" alt="" width="80">
+        <img class="current-photo" src="<?= e(member_photo_url($member)) ?>" alt="" width="80">
     <?php endif; ?>
 
     <div class="form-actions">
         <button type="submit">حفظ</button>
-        <a href="index.php" class="button secondary">إلغاء</a>
+        <a href="tree.php" class="button secondary">إلغاء</a>
     </div>
 </form>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php require __DIR__ . '/includes/footer.php'; ?>

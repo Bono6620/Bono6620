@@ -13,6 +13,7 @@ define('SITE_URL', 'https://example.infinityfreeapp.com');
 define('UPLOAD_DIR', __DIR__ . '/uploads');
 define('UPLOAD_URL', 'uploads');
 define('MAX_UPLOAD_BYTES', 2 * 1024 * 1024);
+define('MAX_DOCUMENT_BYTES', 8 * 1024 * 1024);
 
 date_default_timezone_set('Africa/Cairo');
 session_start();

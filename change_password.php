@@ -1,9 +1,10 @@
 <?php
-require_once __DIR__ . '/../includes/functions.php';
-require_admin();
+require_once __DIR__ . '/includes/auth.php';
+require_login();
 
 $error = '';
 $success = '';
+$user = current_user();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -11,11 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new = $_POST['new_password'] ?? '';
     $confirm = $_POST['confirm_password'] ?? '';
 
-    $stmt = get_db()->prepare('SELECT * FROM admins WHERE id = ?');
-    $stmt->execute([$_SESSION['admin_id']]);
-    $admin = $stmt->fetch();
-
-    if (!$admin || !password_verify($current, $admin['password_hash'])) {
+    if (!password_verify($current, $user['password_hash'])) {
         $error = 'كلمة السر الحالية غلط.';
     } elseif (strlen($new) < 8) {
         $error = 'كلمة السر الجديدة لازم تكون 8 حروف على الأقل.';
@@ -23,14 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'كلمة السر الجديدة والتأكيد مش متطابقين.';
     } else {
         $hash = password_hash($new, PASSWORD_BCRYPT);
-        get_db()->prepare('UPDATE admins SET password_hash = ? WHERE id = ?')->execute([$hash, $admin['id']]);
+        get_db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([$hash, $user['id']]);
         $success = 'تم تغيير كلمة السر بنجاح.';
     }
 }
 
 $pageTitle = 'تغيير كلمة السر';
-$assetPrefix = '../';
-require __DIR__ . '/../includes/header.php';
+require __DIR__ . '/includes/header.php';
 ?>
 <section class="auth-box">
     <h1>تغيير كلمة السر</h1>
@@ -48,7 +44,7 @@ require __DIR__ . '/../includes/header.php';
             <input type="password" name="confirm_password" required minlength="8">
         </label>
         <button type="submit">حفظ</button>
-        <a href="index.php" class="button secondary">رجوع</a>
+        <a href="tree.php" class="button secondary">رجوع</a>
     </form>
 </section>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php require __DIR__ . '/includes/footer.php'; ?>

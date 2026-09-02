@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/../includes/functions.php';
-require_admin();
+require_once __DIR__ . '/includes/auth.php';
+require_edit();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: index.php');
+    header('Location: tree.php');
     exit;
 }
 
@@ -23,8 +23,8 @@ if ($firstName === '') {
 
 $lastName = trim($_POST['last_name'] ?? '') ?: null;
 $gender = ($_POST['gender'] ?? 'male') === 'female' ? 'female' : 'male';
-$birthYear = $_POST['birth_year'] !== '' ? (int) $_POST['birth_year'] : null;
-$deathYear = $_POST['death_year'] !== '' ? (int) $_POST['death_year'] : null;
+$birthYear = ($_POST['birth_year'] ?? '') !== '' ? (int) $_POST['birth_year'] : null;
+$deathYear = ($_POST['death_year'] ?? '') !== '' ? (int) $_POST['death_year'] : null;
 $bio = trim($_POST['bio'] ?? '') ?: null;
 
 $fatherId = (int) ($_POST['father_id'] ?? 0) ?: null;
@@ -39,8 +39,8 @@ foreach ([$fatherId, $motherId, $spouseId] as $relId) {
 
 try {
     $photo = handle_photo_upload('photo', $existing['photo'] ?? null);
-} catch (RuntimeException $e) {
-    exit(e($e->getMessage()));
+} catch (RuntimeException $ex) {
+    exit(e($ex->getMessage()));
 }
 
 $db = get_db();
@@ -62,5 +62,5 @@ if ($spouseId) {
     $db->prepare('UPDATE members SET spouse_id = ? WHERE id = ?')->execute([$id, $spouseId]);
 }
 
-header('Location: index.php');
+header('Location: member.php?id=' . $id);
 exit;

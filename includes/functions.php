@@ -28,19 +28,6 @@ function csrf_check(): void
     }
 }
 
-function is_admin_logged_in(): bool
-{
-    return !empty($_SESSION['admin_id']);
-}
-
-function require_admin(): void
-{
-    if (!is_admin_logged_in()) {
-        header('Location: login.php');
-        exit;
-    }
-}
-
 function get_member(int $id): ?array
 {
     $stmt = get_db()->prepare('SELECT * FROM members WHERE id = ?');
@@ -161,46 +148,151 @@ function render_tree_node(array $member): string
     return $html;
 }
 
-function handle_photo_upload(string $fieldName, ?string $existingPhoto = null): ?string
+function handle_upload(string $fieldName, string $destDir, array $allowedMimes, int $maxBytes, ?string $existingFilename = null): ?string
 {
     if (empty($_FILES[$fieldName]) || $_FILES[$fieldName]['error'] === UPLOAD_ERR_NO_FILE) {
-        return $existingPhoto;
+        return $existingFilename;
     }
 
     $file = $_FILES[$fieldName];
     if ($file['error'] !== UPLOAD_ERR_OK) {
-        throw new RuntimeException('حصل خطأ أثناء رفع الصورة.');
+        throw new RuntimeException('حصل خطأ أثناء رفع الملف.');
     }
-    if ($file['size'] > MAX_UPLOAD_BYTES) {
-        throw new RuntimeException('حجم الصورة أكبر من المسموح (2 ميجا).');
+    if ($file['size'] > $maxBytes) {
+        throw new RuntimeException('حجم الملف أكبر من المسموح.');
     }
 
-    $allowed = [
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/webp' => 'webp',
-    ];
     $mime = mime_content_type($file['tmp_name']);
-    if (!isset($allowed[$mime])) {
-        throw new RuntimeException('نوع الصورة غير مدعوم، استخدم jpg أو png أو webp.');
+    if (!isset($allowedMimes[$mime])) {
+        throw new RuntimeException('نوع الملف غير مدعوم.');
     }
 
-    if (!is_dir(UPLOAD_DIR)) {
-        mkdir(UPLOAD_DIR, 0755, true);
+    if (!is_dir($destDir)) {
+        mkdir($destDir, 0755, true);
     }
 
-    $filename = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
-    $destination = UPLOAD_DIR . '/' . $filename;
+    $filename = bin2hex(random_bytes(16)) . '.' . $allowedMimes[$mime];
+    $destination = $destDir . '/' . $filename;
     if (!move_uploaded_file($file['tmp_name'], $destination)) {
-        throw new RuntimeException('تعذر حفظ الصورة على السيرفر.');
+        throw new RuntimeException('تعذر حفظ الملف على السيرفر.');
     }
 
-    if ($existingPhoto) {
-        $oldPath = UPLOAD_DIR . '/' . $existingPhoto;
+    if ($existingFilename) {
+        $oldPath = $destDir . '/' . $existingFilename;
         if (is_file($oldPath)) {
             @unlink($oldPath);
         }
     }
 
     return $filename;
+}
+
+const IMAGE_MIME_MAP = [
+    'image/jpeg' => 'jpg',
+    'image/png' => 'png',
+    'image/webp' => 'webp',
+];
+
+const DOCUMENT_MIME_MAP = [
+    'image/jpeg' => 'jpg',
+    'image/png' => 'png',
+    'image/webp' => 'webp',
+    'application/pdf' => 'pdf',
+];
+
+const GENERIC_FILE_MIME_MAP = [
+    'image/jpeg' => 'jpg',
+    'image/png' => 'png',
+    'image/webp' => 'webp',
+    'image/gif' => 'gif',
+    'application/pdf' => 'pdf',
+    'application/msword' => 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+    'application/vnd.ms-excel' => 'xls',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+    'application/zip' => 'zip',
+    'text/plain' => 'txt',
+];
+
+function handle_photo_upload(string $fieldName, ?string $existingPhoto = null): ?string
+{
+    return handle_upload($fieldName, UPLOAD_DIR, IMAGE_MIME_MAP, MAX_UPLOAD_BYTES, $existingPhoto);
+}
+
+function handle_document_upload(string $fieldName, ?string $existingFile = null): ?string
+{
+    return handle_upload($fieldName, UPLOAD_DIR . '/documents', DOCUMENT_MIME_MAP, MAX_DOCUMENT_BYTES, $existingFile);
+}
+
+function handle_generic_file_upload(string $fieldName, ?string $existingFile = null): ?string
+{
+    return handle_upload($fieldName, UPLOAD_DIR . '/files', GENERIC_FILE_MIME_MAP, MAX_DOCUMENT_BYTES, $existingFile);
+}
+
+function delete_uploaded_file(string $destDir, ?string $filename): void
+{
+    if (!$filename) {
+        return;
+    }
+    $path = $destDir . '/' . $filename;
+    if (is_file($path)) {
+        @unlink($path);
+    }
+}
+
+function format_bytes(int $bytes): string
+{
+    if ($bytes >= 1024 * 1024) {
+        return round($bytes / (1024 * 1024), 1) . ' ميجا';
+    }
+    return round($bytes / 1024, 1) . ' كيلو';
+}
+
+function get_event(int $id): ?array
+{
+    $stmt = get_db()->prepare('SELECT * FROM events WHERE id = ?');
+    $stmt->execute([$id]);
+    return $stmt->fetch() ?: null;
+}
+
+function get_all_events(): array
+{
+    return get_db()->query(
+        'SELECT * FROM events ORDER BY sort_year IS NULL, sort_year, created_at'
+    )->fetchAll();
+}
+
+function get_document(int $id): ?array
+{
+    $stmt = get_db()->prepare('SELECT * FROM documents WHERE id = ?');
+    $stmt->execute([$id]);
+    return $stmt->fetch() ?: null;
+}
+
+function get_all_documents(): array
+{
+    return get_db()->query(
+        'SELECT * FROM documents ORDER BY sort_year IS NULL, sort_year, created_at'
+    )->fetchAll();
+}
+
+function document_category_label(string $category): string
+{
+    return match ($category) {
+        'waqf' => 'وقف',
+        'inheritance' => 'ورث',
+        default => 'أخرى',
+    };
+}
+
+function get_file_record(int $id): ?array
+{
+    $stmt = get_db()->prepare('SELECT * FROM files WHERE id = ?');
+    $stmt->execute([$id]);
+    return $stmt->fetch() ?: null;
+}
+
+function get_all_files(): array
+{
+    return get_db()->query('SELECT * FROM files ORDER BY uploaded_at DESC')->fetchAll();
 }

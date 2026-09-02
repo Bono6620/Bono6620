@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/includes/auth.php';
 
-if (is_admin_logged_in()) {
+if (current_user()) {
     header('Location: index.php');
     exit;
 }
@@ -13,14 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    $stmt = get_db()->prepare('SELECT * FROM admins WHERE username = ?');
-    $stmt->execute([$username]);
-    $admin = $stmt->fetch();
-
-    if ($admin && password_verify($password, $admin['password_hash'])) {
+    $user = attempt_login($username, $password);
+    if ($user) {
         session_regenerate_id(true);
-        $_SESSION['admin_id'] = $admin['id'];
-        $_SESSION['admin_username'] = $admin['username'];
+        $_SESSION['user_id'] = $user['id'];
         header('Location: index.php');
         exit;
     }
@@ -28,12 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $error = 'اسم المستخدم أو كلمة السر غلط.';
 }
 
-$pageTitle = 'تسجيل دخول الأدمن';
-$assetPrefix = '../';
-require __DIR__ . '/../includes/header.php';
+$pageTitle = 'تسجيل الدخول';
+require __DIR__ . '/includes/header.php';
 ?>
-<section class="auth-box">
-    <h1>تسجيل دخول الأدمن</h1>
+<section class="auth-box centered-box">
+    <h1><?= e(SITE_NAME) ?></h1>
+    <p class="muted">سجّل دخولك عشان تشوف شجرة العائلة.</p>
     <?php if ($error): ?>
         <p class="alert"><?= e($error) ?></p>
     <?php endif; ?>
@@ -48,4 +44,4 @@ require __DIR__ . '/../includes/header.php';
         <button type="submit">دخول</button>
     </form>
 </section>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php require __DIR__ . '/includes/footer.php'; ?>

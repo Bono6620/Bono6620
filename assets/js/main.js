@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
+    var userMenu = document.querySelector('.user-menu');
+    if (userMenu) {
+        userMenu.setAttribute('tabindex', '0');
+        userMenu.addEventListener('click', function (e) {
+            e.stopPropagation();
+            userMenu.classList.toggle('is-open');
+        });
+        document.addEventListener('click', function () {
+            userMenu.classList.remove('is-open');
+        });
+    }
+
     var searchInput = document.getElementById('member-search');
     var tree = document.getElementById('family-tree');
     if (!searchInput || !tree) return;

@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/auth.php';
+require_login();
 
 $id = (int) ($_GET['id'] ?? 0);
 $member = $id ? get_member($id) : null;
@@ -7,13 +8,15 @@ $member = $id ? get_member($id) : null;
 if (!$member) {
     http_response_code(404);
     $pageTitle = 'غير موجود';
+    $activeTab = 'tree';
     require __DIR__ . '/includes/header.php';
-    echo '<div class="empty-state"><p>الشخص ده مش موجود.</p><p><a href="index.php">رجوع للشجرة</a></p></div>';
+    echo '<div class="empty-state"><p>الشخص ده مش موجود.</p><p><a href="tree.php">رجوع للشجرة</a></p></div>';
     require __DIR__ . '/includes/footer.php';
     exit;
 }
 
 $pageTitle = member_full_name($member);
+$activeTab = 'tree';
 $father = $member['father_id'] ? get_member((int) $member['father_id']) : null;
 $mother = $member['mother_id'] ? get_member((int) $member['mother_id']) : null;
 $spouse = $member['spouse_id'] ? get_member((int) $member['spouse_id']) : null;
@@ -26,7 +29,19 @@ require __DIR__ . '/includes/header.php';
         <img src="<?= e(member_photo_url($member)) ?>" alt="<?= e(member_full_name($member)) ?>">
     </div>
     <div class="member-profile-info">
-        <h1><?= e(member_full_name($member)) ?></h1>
+        <div class="profile-heading">
+            <h1><?= e(member_full_name($member)) ?></h1>
+            <?php if (can_edit()): ?>
+                <div class="profile-actions">
+                    <a class="button secondary" href="member_form.php?id=<?= (int) $member['id'] ?>">تعديل</a>
+                    <form method="post" action="member_delete.php" onsubmit="return confirm('متأكد إنك عايز تمسح <?= e(member_full_name($member)) ?>؟');">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="id" value="<?= (int) $member['id'] ?>">
+                        <button type="submit" class="button danger">حذف</button>
+                    </form>
+                </div>
+            <?php endif; ?>
+        </div>
         <?php if (member_years_label($member)): ?>
             <p class="years"><?= e(member_years_label($member)) ?></p>
         <?php endif; ?>
@@ -59,7 +74,7 @@ require __DIR__ . '/includes/header.php';
             </ul>
         <?php endif; ?>
 
-        <p><a href="index.php">&larr; رجوع للشجرة</a></p>
+        <p><a href="tree.php">&larr; رجوع للشجرة</a></p>
     </div>
 </article>
 <?php require __DIR__ . '/includes/footer.php'; ?>

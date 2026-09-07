@@ -19,7 +19,8 @@ function fa_maybe_enqueue_assets(): void
     if (!is_page(FA_TAB_SLUGS)) {
         return;
     }
-    wp_enqueue_style('fa-style', FA_URL . 'assets/css/style.css', [], FA_VERSION);
+    wp_enqueue_style('fa-google-font', 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap', [], null);
+    wp_enqueue_style('fa-style', FA_URL . 'assets/css/style.css', ['fa-google-font'], FA_VERSION);
     wp_enqueue_script('fa-script', FA_URL . 'assets/js/main.js', [], FA_VERSION, true);
 }
 
@@ -34,6 +35,20 @@ function fa_template_override(string $template): string
         }
     }
     return $template;
+}
+
+function fa_file_icon_for_name(string $originalName): string
+{
+    $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+    return match ($ext) {
+        'jpg', 'jpeg', 'png', 'webp', 'gif' => '🖼️',
+        'pdf' => '📕',
+        'doc', 'docx' => '📝',
+        'xls', 'xlsx' => '📊',
+        'zip' => '🗜️',
+        'txt' => '📄',
+        default => '📎',
+    };
 }
 
 function fa_document_category_label(string $category): string
@@ -52,23 +67,27 @@ function fa_render_nav(string $active): string
     $isAdmin = current_user_can('manage_options');
 
     $tabs = [
-        'tree' => ['url' => home_url('/family-tree/'), 'label' => 'الشجرة'],
-        'files' => ['url' => home_url('/family-files/'), 'label' => 'الملفات'],
-        'timeline' => ['url' => home_url('/family-timeline/'), 'label' => 'الأحداث الزمنية'],
-        'documents' => ['url' => home_url('/family-documents/'), 'label' => 'الوثائق'],
+        'tree' => ['url' => home_url('/family-tree/'), 'label' => 'الشجرة', 'icon' => '🌳'],
+        'files' => ['url' => home_url('/family-files/'), 'label' => 'الملفات', 'icon' => '📁'],
+        'timeline' => ['url' => home_url('/family-timeline/'), 'label' => 'الأحداث الزمنية', 'icon' => '🕰️'],
+        'documents' => ['url' => home_url('/family-documents/'), 'label' => 'الوثائق', 'icon' => '📜'],
     ];
 
+    $displayName = $user->display_name ?: $user->user_login;
+    $initial = function_exists('mb_substr') ? mb_substr($displayName, 0, 1) : substr($displayName, 0, 1);
+
     $html = '<header class="fa-header"><div class="fa-header-inner">';
-    $html .= '<a href="' . esc_url(home_url('/family-tree/')) . '" class="fa-site-title">' . esc_html(get_bloginfo('name')) . '</a>';
+    $html .= '<a href="' . esc_url(home_url('/family-tree/')) . '" class="fa-site-title"><span class="fa-site-icon">🌿</span>' . esc_html(get_bloginfo('name')) . '</a>';
     $html .= '<nav class="fa-main-tabs">';
     foreach ($tabs as $key => $tab) {
         $class = $key === $active ? 'is-active' : '';
-        $html .= '<a href="' . esc_url($tab['url']) . '" class="' . $class . '">' . esc_html($tab['label']) . '</a>';
+        $html .= '<a href="' . esc_url($tab['url']) . '" class="' . $class . '"><span aria-hidden="true">' . $tab['icon'] . '</span>' . esc_html($tab['label']) . '</a>';
     }
     $html .= '</nav>';
 
     $html .= '<div class="fa-user-menu">';
-    $html .= '<span class="fa-user-name">' . esc_html($user->display_name ?: $user->user_login) . '</span>';
+    $html .= '<span class="fa-user-avatar" aria-hidden="true">' . esc_html($initial) . '</span>';
+    $html .= '<span class="fa-user-name">' . esc_html($displayName) . '</span>';
     $html .= '<div class="fa-user-menu-dropdown">';
     $html .= '<a href="' . esc_url(admin_url('profile.php')) . '">تغيير كلمة السر</a>';
     if ($isAdmin) {
@@ -104,9 +123,9 @@ function fa_shortcode_tree(): string
     echo '</section>';
 
     if (!$roots) {
-        echo '<div class="fa-empty-state"><p>لسه مفيش أفراد مضافين في الشجرة.</p>';
+        echo '<div class="fa-empty-state"><span class="fa-empty-icon">🌳</span><p>لسه مفيش أفراد مضافين في الشجرة.</p>';
         if ($canEdit) {
-            echo '<p><a href="' . esc_url(admin_url('post-new.php?post_type=fa_member')) . '">ابدأ بإضافة أول فرد</a></p>';
+            echo '<p><a class="fa-button" href="' . esc_url(admin_url('post-new.php?post_type=fa_member')) . '">+ ابدأ بإضافة أول فرد</a></p>';
         }
         echo '</div>';
     } else {
@@ -236,7 +255,16 @@ function fa_maybe_show_member_profile(string $content): string
     if (empty($_GET['fa_member']) || !has_shortcode($content, 'fa_tree')) {
         return $content;
     }
-    return fa_render_member_profile(absint($_GET['fa_member']));
+    if (!is_user_logged_in()) {
+        return $content;
+    }
+
+    $html = '<div class="fa-app">';
+    $html .= fa_render_nav('tree');
+    $html .= '<main class="fa-main">';
+    $html .= fa_render_member_profile(absint($_GET['fa_member']));
+    $html .= '</main></div>';
+    return $html;
 }
 
 function fa_shortcode_files(): string
@@ -258,13 +286,14 @@ function fa_shortcode_files(): string
     echo '</section>';
 
     if (!$files) {
-        echo '<div class="fa-empty-state"><p>لسه مفيش ملفات مرفوعة.</p></div>';
+        echo '<div class="fa-empty-state"><span class="fa-empty-icon">📁</span><p>لسه مفيش ملفات مرفوعة.</p></div>';
     } else {
         echo '<div class="fa-card-grid">';
         foreach ($files as $file) {
             $original = get_post_meta($file->ID, '_fa_file_original', true);
             $size = (int) get_post_meta($file->ID, '_fa_file_size', true);
             echo '<div class="fa-item-card">';
+            echo '<span class="fa-item-card-icon" aria-hidden="true">' . fa_file_icon_for_name($original ?: '') . '</span>';
             echo '<h3>' . esc_html(get_the_title($file)) . '</h3>';
             if ($file->post_content) {
                 echo '<p>' . esc_html(wp_strip_all_tags($file->post_content)) . '</p>';
@@ -306,7 +335,7 @@ function fa_shortcode_timeline(): string
     echo '</section>';
 
     if (!$events) {
-        echo '<div class="fa-empty-state"><p>لسه مفيش أحداث مسجلة.</p></div>';
+        echo '<div class="fa-empty-state"><span class="fa-empty-icon">🕰️</span><p>لسه مفيش أحداث مسجلة.</p></div>';
     } else {
         echo '<ol class="fa-timeline">';
         foreach ($events as $event) {
@@ -368,7 +397,7 @@ function fa_shortcode_documents(): string
     echo '</div>';
 
     if (!$documents) {
-        echo '<div class="fa-empty-state"><p>لسه مفيش وثائق مسجلة في القسم ده.</p></div>';
+        echo '<div class="fa-empty-state"><span class="fa-empty-icon">📜</span><p>لسه مفيش وثائق مسجلة في القسم ده.</p></div>';
     } else {
         echo '<div class="fa-card-grid">';
         foreach ($documents as $doc) {
@@ -377,7 +406,14 @@ function fa_shortcode_documents(): string
             $relatedId = (int) get_post_meta($doc->ID, '_fa_related_member_id', true);
             $hasFile = (bool) get_post_meta($doc->ID, '_fa_file', true);
 
+            $docIcon = match ($category) {
+                'waqf' => '🕌',
+                'inheritance' => '⚖️',
+                default => '📄',
+            };
+
             echo '<div class="fa-item-card">';
+            echo '<span class="fa-item-card-icon" aria-hidden="true">' . $docIcon . '</span>';
             echo '<span class="fa-category-badge fa-category-' . esc_attr($category) . '">' . esc_html(fa_document_category_label($category)) . '</span>';
             echo '<h3>' . esc_html(get_the_title($doc)) . '</h3>';
             if ($dateLabel) {

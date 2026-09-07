@@ -85,6 +85,46 @@ function fa_handle_secure_upload(int $postId, string $sub, array $mimeMap, strin
     update_post_meta($postId, '_fa_file_size', (int) $file['size']);
 }
 
+function fa_store_uploaded_bytes(int $postId, string $sub, array $mimeMap, string $bytes, string $originalName): bool
+{
+    if (strlen($bytes) > FA_MAX_UPLOAD_BYTES) {
+        return false;
+    }
+
+    $tmpPath = tempnam(sys_get_temp_dir(), 'fa-upload');
+    if (!$tmpPath || file_put_contents($tmpPath, $bytes) === false) {
+        return false;
+    }
+
+    $mime = mime_content_type($tmpPath);
+    if (!isset($mimeMap[$mime])) {
+        @unlink($tmpPath);
+        return false;
+    }
+
+    $dir = fa_private_dir($sub);
+    $filename = bin2hex(random_bytes(16)) . '.' . $mimeMap[$mime];
+    $destination = $dir . '/' . $filename;
+    if (!rename($tmpPath, $destination)) {
+        @unlink($tmpPath);
+        return false;
+    }
+
+    $old = get_post_meta($postId, '_fa_file', true);
+    if ($old) {
+        $oldPath = $dir . '/' . $old;
+        if (is_file($oldPath)) {
+            @unlink($oldPath);
+        }
+    }
+
+    update_post_meta($postId, '_fa_file', $filename);
+    update_post_meta($postId, '_fa_file_original', sanitize_file_name($originalName));
+    update_post_meta($postId, '_fa_file_size', strlen($bytes));
+
+    return true;
+}
+
 function fa_delete_secure_upload(int $postId, string $sub): void
 {
     $filename = get_post_meta($postId, '_fa_file', true);

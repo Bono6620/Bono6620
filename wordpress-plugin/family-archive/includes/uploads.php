@@ -136,6 +136,26 @@ function fa_delete_secure_upload(int $postId, string $sub): void
     }
 }
 
+function fa_set_member_photo_from_upload(int $postId): void
+{
+    if (empty($_FILES['fa_photo']) || $_FILES['fa_photo']['error'] === UPLOAD_ERR_NO_FILE) {
+        return;
+    }
+    if ($_FILES['fa_photo']['error'] !== UPLOAD_ERR_OK) {
+        return;
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
+
+    $attachmentId = media_handle_upload('fa_photo', $postId);
+    if (is_wp_error($attachmentId)) {
+        return;
+    }
+    set_post_thumbnail($postId, $attachmentId);
+}
+
 function fa_format_bytes(int $bytes): string
 {
     if ($bytes >= 1024 * 1024) {

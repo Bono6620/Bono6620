@@ -10,7 +10,7 @@ add_action('init', function () {
     add_shortcode('fa_documents', 'fa_shortcode_documents');
 });
 
-const FA_TAB_SLUGS = ['family-tree', 'family-files', 'family-timeline', 'family-documents'];
+const FA_TAB_SLUGS = ['family-tree', 'family-files', 'family-timeline', 'family-documents', 'family-account', 'family-admin'];
 
 add_action('wp_enqueue_scripts', 'fa_maybe_enqueue_assets');
 
@@ -89,11 +89,11 @@ function fa_render_nav(string $active): string
     $html .= '<span class="fa-user-avatar" aria-hidden="true">' . esc_html($initial) . '</span>';
     $html .= '<span class="fa-user-name">' . esc_html($displayName) . '</span>';
     $html .= '<div class="fa-user-menu-dropdown">';
-    $html .= '<a href="' . esc_url(admin_url('profile.php')) . '">تغيير كلمة السر</a>';
+    $html .= '<a href="' . esc_url(home_url('/family-account/')) . '">👤 حسابي</a>';
     if ($isAdmin) {
-        $html .= '<a href="' . esc_url(admin_url('users.php')) . '">إدارة المستخدمين</a>';
+        $html .= '<a href="' . esc_url(home_url('/family-admin/')) . '">🛠️ لوحة التحكم</a>';
     }
-    $html .= '<a href="' . esc_url(wp_logout_url(home_url('/'))) . '">تسجيل خروج</a>';
+    $html .= '<a href="' . esc_url(wp_logout_url(home_url('/'))) . '">🚪 تسجيل خروج</a>';
     $html .= '</div></div>';
 
     $html .= '</div></header>';

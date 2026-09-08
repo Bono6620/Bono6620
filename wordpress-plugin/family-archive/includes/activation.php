@@ -3,23 +3,22 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-function fa_activate(): void
+function fa_page_definitions(): array
 {
-    fa_register_post_types();
-    fa_register_roles();
-
-    fa_private_dir('documents');
-    fa_private_dir('files');
-
-    $pages = [
+    return [
         'family-tree' => ['title' => 'الشجرة', 'shortcode' => '[fa_tree]'],
         'family-files' => ['title' => 'الملفات', 'shortcode' => '[fa_files]'],
         'family-timeline' => ['title' => 'الأحداث الزمنية', 'shortcode' => '[fa_timeline]'],
         'family-documents' => ['title' => 'الوثائق', 'shortcode' => '[fa_documents]'],
+        'family-account' => ['title' => 'حسابي', 'shortcode' => '[fa_account]'],
+        'family-admin' => ['title' => 'لوحة التحكم', 'shortcode' => '[fa_admin]'],
     ];
+}
 
+function fa_ensure_pages_exist(): int
+{
     $treePageId = 0;
-    foreach ($pages as $slug => $data) {
+    foreach (fa_page_definitions() as $slug => $data) {
         $existing = get_page_by_path($slug);
         if ($existing) {
             if ($slug === 'family-tree') {
@@ -40,6 +39,18 @@ function fa_activate(): void
             $treePageId = $pageId;
         }
     }
+    return $treePageId;
+}
+
+function fa_activate(): void
+{
+    fa_register_post_types();
+    fa_register_roles();
+
+    fa_private_dir('documents');
+    fa_private_dir('files');
+
+    $treePageId = fa_ensure_pages_exist();
 
     if ($treePageId) {
         update_option('show_on_front', 'page');
@@ -50,6 +61,20 @@ function fa_activate(): void
         update_option('permalink_structure', '/%postname%/');
     }
 
+    update_option('fa_pages_version', FA_VERSION);
+
+    flush_rewrite_rules();
+}
+
+add_action('init', 'fa_maybe_upgrade_pages', 2);
+
+function fa_maybe_upgrade_pages(): void
+{
+    if (get_option('fa_pages_version') === FA_VERSION) {
+        return;
+    }
+    fa_ensure_pages_exist();
+    update_option('fa_pages_version', FA_VERSION);
     flush_rewrite_rules();
 }
 

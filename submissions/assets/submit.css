@@ -1,0 +1,254 @@
+/* استايل وحدة "تسليم الورق المطلوب" — مبني على متغيرات استايل الموقع الأساسي */
+
+/* ---------- زراير الفروع / الفولدرات ---------- */
+.branch-section {
+    max-width: 900px;
+    margin: 24px auto 48px;
+    padding: 0 24px;
+}
+
+.branch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.branch-btn,
+.folder-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px 18px;
+    text-decoration: none;
+    color: var(--ink);
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    text-align: center;
+}
+
+.branch-btn:hover,
+.folder-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(35, 38, 31, 0.18);
+}
+
+.branch-letter {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.branch-name,
+.folder-name {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--green-dark);
+}
+
+.branch-go {
+    font-size: 13px;
+    color: var(--gold-dark);
+    font-weight: 600;
+}
+
+.folder-icon { font-size: 34px; line-height: 1; }
+.folder-meta { font-size: 13.5px; color: #6b6f63; }
+.folder-date { font-size: 12.5px; color: #8b8f82; }
+.folder-btn.is-empty { opacity: 0.72; }
+
+/* ---------- نموذج الرفع ---------- */
+.form-section {
+    max-width: 640px;
+    margin: 20px auto 48px;
+    padding: 0 24px;
+}
+
+.admin-form input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px dashed var(--gold);
+    border-radius: 10px;
+    background: #fffdf8;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.req { color: #b3261e; font-style: normal; }
+
+.field-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: #6b6f63;
+    line-height: 1.7;
+}
+
+.hint-text {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+    color: #6b6f63;
+    line-height: 2;
+}
+
+/* خانة فخ للبوتات — مخفية عن الناس */
+.hp-field {
+    position: absolute;
+    right: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.file-list { margin-top: 10px; display: grid; gap: 6px; }
+
+.file-row {
+    font-size: 13px;
+    background: #f4efe3;
+    border-radius: 8px;
+    padding: 7px 12px;
+    color: #4a4f44;
+    word-break: break-all;
+}
+
+.file-row.too-big {
+    background: #fdecea;
+    color: #b3261e;
+}
+
+.done-box {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.done-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+/* ---------- كروت التسليم في صفحة الإدارة ---------- */
+.docs-section {
+    max-width: 1000px;
+    margin: 20px auto 48px;
+    padding: 0 24px;
+}
+
+.submission-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.submission-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #ece5d4;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+}
+
+.submission-head h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--green-dark);
+}
+
+.submission-date {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #6b6f63;
+}
+
+.submission-note {
+    background: #f7f3e8;
+    border-right: 3px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin: 0 0 14px;
+    line-height: 1.9;
+}
+
+.submission-del button {
+    background: none;
+    border: 1px solid #f3c2bd;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.doc-thumb-pdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    background: #efe9d8;
+    color: var(--green-dark);
+    font-weight: 800;
+    font-size: 22px;
+    text-decoration: none;
+}
+
+.doc-thumb { height: 150px; width: 100%; object-fit: cover; display: block; }
+
+/* ---------- زرار تسليم الورق في صفحة تسجيل الدخول ---------- */
+.login-submit-link {
+    display: block;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #ece5d4;
+}
+
+.login-submit-link a {
+    display: block;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #fff;
+    text-decoration: none;
+    padding: 13px 18px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    text-align: center;
+    transition: opacity 0.15s ease;
+}
+
+.login-submit-link a:hover { opacity: 0.92; }
+
+.login-submit-link p {
+    margin: 8px 0 0;
+    font-size: 12.5px;
+    color: #6b6f63;
+    text-align: center;
+}
+
+@media (max-width: 520px) {
+    .branch-grid { grid-template-columns: 1fr; }
+    .submission-head { flex-direction: column; }
+}

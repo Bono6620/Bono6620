@@ -1,0 +1,5 @@
+# الملفات المرفوعة وبياناتها مبتترفعش على git
+files/*
+!files/.gitkeep
+submissions.json
+rate.json

@@ -1,0 +1,69 @@
+# رفع تلقائي لوحدة "تسليم الورق المطلوب" على استضافة الموقع
+# ------------------------------------------------------------------
+# بيشتغل لوحده كل ما يحصل تعديل في فولدر submissions.
+#
+# قبل ما يشتغل، لازم تضيف 3 أسرار في GitHub:
+#   Settings ← Secrets and variables ← Actions ← New repository secret
+#
+#   FTP_SERVER    عنوان سيرفر الـ FTP (من DirectAdmin، مثال: ftp.elkharbotly.cu.ma)
+#   FTP_USERNAME  اسم مستخدم الـ FTP
+#   FTP_PASSWORD  كلمة سر الـ FTP
+#
+# الأسرار دي مشفّرة عند GitHub — محدش بيقدر يقراها، ولا بتظهر في اللوج.
+# طول ما الأسرار مش متظبطة، الرفع بيتخطّى بهدوء من غير ما يفشل.
+
+name: رفع وحدة تسليم الورق
+
+on:
+  push:
+    branches:
+      - main
+      - claude/family-document-upload-system-9j2252
+    paths:
+      - 'submissions/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:        # عشان تقدر تشغّله يدوي من تبويب Actions
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: التأكد إن بيانات الـ FTP متظبطة
+        id: check
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          if [ -n "$FTP_SERVER" ] && [ -n "$FTP_USERNAME" ] && [ -n "$FTP_PASSWORD" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "بيانات الـ FTP موجودة — هيتم الرفع."
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=الرفع اتخطّى::بيانات الـ FTP لسه مش متظبطة. ضيف الأسرار FTP_SERVER و FTP_USERNAME و FTP_PASSWORD من Settings ← Secrets and variables ← Actions، وبعدين شغّل الرفع تاني من تبويب Actions."
+          fi
+
+      - name: جلب الملفات
+        if: steps.check.outputs.configured == 'true'
+        uses: actions/checkout@v4
+
+      - name: الرفع على الاستضافة عبر FTP
+        if: steps.check.outputs.configured == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps            # لو الاستضافة مش داعمة FTPS غيّرها لـ ftp
+          local-dir: ./submissions/
+          server-dir: ./submissions/
+          # مهم جداً: الورق اللي الناس رفعته على السيرفر ما يتمسحش
+          # ولا يتكتب عليه لما نرفع نسخة جديدة من الكود.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/data/files/**
+            **/data/submissions.json
+            **/data/rate.json
+            **/README-AR.md
+            **/snippets/**

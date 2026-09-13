@@ -1,0 +1,26 @@
+<!-- ================================================================
+     زرار "تسليم الورق المطلوب" — يتحط في login.php
+     ----------------------------------------------------------------
+     حط الكود ده جوه <div class="login-card"> بعد </form> على طول،
+     يعني كده:
+
+         <form method="post" class="login-form" autocomplete="off">
+             ...
+         </form>
+
+         <!-- ابتداءً من هنا -->
+         <div class="login-submit-link"> ... </div>
+         <!-- لحد هنا -->
+
+     </div>
+     ================================================================ -->
+
+<div class="login-submit-link">
+    <a href="submissions/">تسليم الورق المطلوب</a>
+    <p>من غير تسجيل دخول — اختار اسم جدّك وارفع الورق.</p>
+</div>
+
+<!-- ولازم كمان تضيف السطر ده في <head> بتاع login.php
+     تحت لينك assets/style.css: -->
+
+<link rel="stylesheet" href="submissions/assets/submit.css?v=1">
